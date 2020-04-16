@@ -278,4 +278,3 @@ void checkUI()          // check buttons and POTs
   if (millis() - POTblueLEDonTime < 10) digitalWrite(blueLEDPin, HIGH);   // flash blue LED for button press feedback
   else digitalWrite(blueLEDPin, LOW);
 }
-

@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "src/continuous_rotation/continuous_rotation.ino",
+    "sketch": "src/OpenVent_Bristol_V2_pressure_control/OpenVent_Bristol_V2_pressure_control.ino",
     "port": "/dev/tty.usbmodem144201"
 }

@@ -4,8 +4,8 @@
 */
 
 #include <LiquidCrystal.h>
-//#include "ArduinoMotorShieldR3.h"
-//ArduinoMotorShieldR3 md;
+#include "ArduinoMotorShieldR3.h"
+ArduinoMotorShieldR3 md;
 
 #define DIR_A 12
 #define PWM_A 3
@@ -301,4 +301,3 @@ int read_LCD_buttons()      // debounce these
 
   // IMPORTANT: Calibration routine needed to account for resistors out of tollerance
 }
-
