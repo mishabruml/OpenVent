@@ -24,7 +24,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 #define ventMode 0
 #define BIPAP 1
 
-#define pressureSensorPin A5          // A0 & A1 are motor current sense pins
+#define pressureSensorPin A2          // A0 & A1 are motor current sense pins
 #define currentLimit 1000;            // current limit for sensing end stop YOU MAY NEED TO CHANGE THIS IF USING A DIFFERENT MOTOR
 
 #define maxPressure 35                // set in NHS spec
@@ -301,3 +301,4 @@ int read_LCD_buttons()      // debounce these
 
   // IMPORTANT: Calibration routine needed to account for resistors out of tollerance
 }
+

@@ -1,4 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "src/continuous_rotation/continuous_rotation.ino"
+    "sketch": "src/continuous_rotation/continuous_rotation.ino",
+    "port": "/dev/tty.usbmodem144201"
 }
