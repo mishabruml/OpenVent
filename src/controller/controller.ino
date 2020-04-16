@@ -1,9 +1,6 @@
 /*
-    OpenVent-Bristol geared DC motor BVM ventilator V2 Arduino software
-    http://darrenlewismechatronics.co.uk/
 */
 
-#include <LiquidCrystal.h>
 //#include "ArduinoMotorShieldR3.h"
 //ArduinoMotorShieldR3 md;
 
@@ -34,12 +31,10 @@ unsigned long lastBreathTime = 0;     // Sorry Sam
 
 void setup()
 {
-  //md.init();
   // set up motor pins
   pinMode(DIR_A, OUTPUT);
   pinMode(PWM_A, OUTPUT);
 
-  Serial.begin(115200);
 
   // set up LCD library
   lcd.begin(16, 2);
@@ -68,9 +63,6 @@ void loop()
   const int Mode_cell = 14;
 
   // measured readings variables
-  static int target_cmH2O;
-  static int target_IE;
-  static int target_BPM;
   static bool target_Mode;
 
   int lcd_key = read_LCD_buttons(); // read the buttons
@@ -168,8 +160,6 @@ void loop()
     oldSpeed = inhaleSpeedVal;                                // record old motor speed
     inhaleSpeedVal = inhaleSpeed(oldSpeed, target_cmH2O);     // calc new motor forewards speed
     setMotor1Speed(inhaleSpeedVal);
-    //Serial.print("inhaleSpeedVal ");
-    //Serial.println(inhaleSpeedVal);
 
   }
   // if inhale time is up
@@ -181,7 +171,6 @@ void loop()
       firstRunExhale = 0;
       Serial.println("firstRunExhale");
     }
-    //unsigned long exhalePeriod = (breathPeriod / (target_IE + 1)) * IEval;   // calc period for exhale, not needed
     // motor reverse for a set time period
     if (millis() - revTimer < revTime)
     {
@@ -189,14 +178,11 @@ void loop()
       oldSpeed = exhaleSpeedVal;                              // record old motor speed
       exhaleSpeedVal = exhaleSpeed(oldSpeed);                 // calc new motor reverse speed
       setMotor1Speed(exhaleSpeedVal);                                      // motor reverse
-      //Serial.print("exhaleSpeedVal ");
-      //Serial.println(exhaleSpeedVal);
     }
     // pause motor until breathPeriod is up
     else
     {
       setMotor1Speed(0);              // stop motor
-      //Serial.println("paused");
     }
   }
   else if (millis() >= breathPeriod)
@@ -285,7 +271,6 @@ float pressureSensorReading()
 }
 
 
-// read the buttons
 int read_LCD_buttons()      // debounce these
 {
   int adc_key_in = analogRead(buttonsLCDpin);             // read the value from the sensor
@@ -301,4 +286,3 @@ int read_LCD_buttons()      // debounce these
 
   // IMPORTANT: Calibration routine needed to account for resistors out of tollerance
 }
-
