@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "Motor_current_stop_test_V3_dwell_control/Motor_current_stop_test_V3_dwell_control.ino",
+    "sketch": "motor_control_with_flowsensor/motor_control_with_flowsensor.ino",
     "port": "/dev/tty.usbmodem144201"
 }
