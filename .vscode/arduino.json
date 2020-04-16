@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "src/OpenVent_Bristol_V2_pressure_control/OpenVent_Bristol_V2_pressure_control.ino",
+    "sketch": "Motor_current_stop_test_V3_dwell_control/Motor_current_stop_test_V3_dwell_control.ino",
     "port": "/dev/tty.usbmodem144201"
 }

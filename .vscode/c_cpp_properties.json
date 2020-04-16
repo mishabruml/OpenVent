@@ -7,6 +7,14 @@
                 "/Users/misha.bruml/Software/Arduino.app/Contents/Java/hardware/arduino/avr/**",
                 "${workspaceFolder}/**"
             ],
+            "browse":{
+                "limitSymbolsToIncludedHeaders": false,
+                "path": [
+                    "/Users/misha.bruml/Software/Arduino.app/Contents/Java/",
+                    "${workspaceRoot}",
+                    "/Users/misha.bruml/Documents/Arduino/libraries/Sensirion_SFM3000_arduino-master/",
+                    "/Users/misha.bruml/Documents/Arduino/libraries/ArduinoMotorShieldR3/"
+                ]},
             "defines": [],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
