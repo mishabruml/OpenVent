@@ -40,8 +40,9 @@ int mSpeed = 0;
 int revTimeSetting = 650;       // time it takes to reverse in ms
 int revSpeed = 400;             // max speed of reverse stroke
 int maxFwdSpeed = -400;         // max speed of motor/acceloration limit
-int currentLimit = 1000;        // current limit
-int postInhaleDwell = 0;
+int currentLimit = 1200;        // current limit
+
+int postInhaleDwell = 500;
 unsigned long postExhaleDwell = 0;
 unsigned long lastBreathTime = 0;
 unsigned long breathPeriod = 0;
@@ -71,9 +72,9 @@ unsigned long breathPeriod = 0;
 void setup()
 {
   md.init();
-  Serial.begin(115200);
-  Serial.println("Arduino Motor Shield R3");
-  Serial.println("stage\t\tms\t\tcurrent");
+  // Serial.begin(115200);
+  // Serial.println("Arduino Motor Shield R3");
+  // Serial.println("stage\t\tms\t\tcurrent");
   //pinMode(9, OUTPUT);           // brake pin
 
   // set up motor pins
@@ -132,7 +133,7 @@ void inhale ()
     }
     setMotor1Speed(mSpeed);
     checkUI();
-    printCycleInfo("inhale",current);
+    // printCycleInfo("inhale",current);
   }
 }
 
@@ -146,7 +147,7 @@ void postInhalePause ()
     setMotor1Speed(0);
     //digitalWrite(9, HIGH);          // apply brake DON'T USE
     checkUI();
-    printCycleInfo("piPause",current);
+    // printCycleInfo("piPause",current);
   }
 }
 
@@ -171,7 +172,7 @@ void exhale ()
     }
     setMotor1Speed(revAccelSpeed);
     checkUI();
-    printCycleInfo("exhale",current);
+    // printCycleInfo("exhale",current);
   }
 }
 
@@ -184,7 +185,7 @@ void postExhalePause ()
     setMotor1Speed(0);
     //digitalWrite(9, HIGH);          // apply brake DON'T USE
     checkUI();
-    printCycleInfo("pePause",current);
+    // printCycleInfo("pePause",current);
   }
 }
 
