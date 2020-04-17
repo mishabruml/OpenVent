@@ -1,3 +1,5 @@
+#include <Wire.h>
+#include <sfm3000wedo.h>
 #include "ArduinoMotorShieldR3.h"
 ArduinoMotorShieldR3 md;
 
@@ -46,35 +48,13 @@ int postInhaleDwell = 500;
 unsigned long postExhaleDwell = 0;
 unsigned long lastBreathTime = 0;
 unsigned long breathPeriod = 0;
-/* with no reverse acceloration
-    revSpeed:    Rev time:  currentLimit:   maxFwdSpeed:
-   133           800 ms     1000 (min)      -400
-   133           1100 ms    1400 (max)      -400
-   200           500 ms     1000 (min)      -400
-   200           700 ms     1400 (max)      -400
-   400           ? ms     1000 (min)      -400
-   400           ? ms     1400 (max)      -400
-
-   with reverse acceloration every
-    revSpeed:    Rev time:  currentLimit:   maxFwdSpeed:
-   133           ? ms     1000 (min)      -400
-   133           ? ms    1400 (max)      -400
-   200           750 ms     1000 (min)      -400
-   200           900 ms     1400 (max)      -400
-
-   we don't change rev speed anymore
-   400           650 ms     800 (min)       -400
-   400           700 ms     1000            -400
-   400           ? ms       1200            -400
-   400           800 ms     1400 (max)      -400
-*/
 
 void setup()
 {
   md.init();
-  // Serial.begin(115200);
-  // Serial.println("Arduino Motor Shield R3");
-  // Serial.println("stage\t\tms\t\tcurrent");
+  Serial.begin(115200);
+  Serial.println("Arduino Motor Shield R3");
+  Serial.println("stage\t\tms\t\tcurrent");
   //pinMode(9, OUTPUT);           // brake pin
 
   // set up motor pins
@@ -86,110 +66,14 @@ void setup()
 void loop()
 {
   checkUI();
-  //digitalWrite(9, LOW);           // release brake DONT USE, IT DOESN'T UNBREAK
 
-  //for (int i = 0; i <= 9; i++)      // repeat x number of times
-  //{
   lastBreathTime = millis();
   inhale();
   postInhalePause();
   exhale();
   postExhalePause();
-  //}
-  //for (;;)    // for testing purposes
-  //{
-  //}
+
 }
-
-
-void printCycleInfo(String cycleStageName, int current)
-{
-  if(millis() % 100 == 0)
-  {
-    Serial.print(cycleStageName);
-    Serial.print("\t\t");
-    Serial.print(millis());
-    Serial.print("\t\t");
-    Serial.print(current);
-    Serial.println();
-  }
-}
-
-// *********** Inhale ***********
-void inhale ()
-{
-  accelTime = millis();               // log time in ms
-  mSpeed = 0;                     // clear motor speed variable
-  setMotor1Speed(mSpeed);         // drive motor
-  while (current < currentLimit)          // drive until current setting
-  {
-    if (mSpeed > maxFwdSpeed)            // acceloration
-    {
-      if (millis() - accelTime > 3)     // accelorate the motor by 1 every 3ms
-      {
-        mSpeed--;                 // - is forward direction
-        accelTime = millis();
-      }
-    }
-    setMotor1Speed(mSpeed);
-    checkUI();
-    // printCycleInfo("inhale",current);
-  }
-}
-
-
-// *********** post inhale pause ***********
-void postInhalePause ()
-{
-  pauseTimer = millis();
-  while (millis() - pauseTimer < postInhaleDwell)                     // dwell
-  {
-    setMotor1Speed(0);
-    //digitalWrite(9, HIGH);          // apply brake DON'T USE
-    checkUI();
-    // printCycleInfo("piPause",current);
-  }
-}
-
-
-// *********** exhale ***********
-void exhale ()
-{
-  unsigned long revTimer = millis();   // log time in ms
-  //while (current > 1000 && millis() - revTime < revTimeSetting)     // reversing based on current was not repeatable
-
-  accelTime = millis();               // log time in ms for acceloration
-  int revAccelSpeed = 0;                     // clear motor speed variable
-  while (millis() - revTimer < revTimeSetting)           // reverse back for a set time
-  {
-    if (revAccelSpeed < revSpeed)            // acceloration
-    {
-      if (millis() - accelTime > 1)     // accelorate the motor by 2 every 3ms
-      {
-        revAccelSpeed++;                 // - is forward direction
-        accelTime = millis();
-      }
-    }
-    setMotor1Speed(revAccelSpeed);
-    checkUI();
-    // printCycleInfo("exhale",current);
-  }
-}
-
-
-// *********** post exhale pause ***********
-void postExhalePause ()
-{
-  while (millis() - lastBreathTime < breathPeriod)                     // dwell
-  {
-    setMotor1Speed(0);
-    //digitalWrite(9, HIGH);          // apply brake DON'T USE
-    checkUI();
-    // printCycleInfo("pePause",current);
-  }
-}
-
-
 
 // ****** drive motors ******
 void setMotor1Speed(int M1speed)
@@ -203,70 +87,4 @@ void setMotor1Speed(int M1speed)
   }
   if (M1speed > 400) M1speed = 400;  // Max PWM dutycycle
   analogWrite(PWM_A, M1speed * 51 / 80); // default to using analogWrite, mapping 400 to 255
-}
-
-// ***** check buttons & POTs and flash LEDs *****
-void checkUI()          // check buttons and POTs
-{
-  current = getCurrentM1();
-  a1 = analogRead(A1);
-  if (analogRead(A2) > maxPressurePOT + 1 || analogRead(A2) < maxPressurePOT - 1) // if values are not equal within a tollerance
-  {
-    maxPressurePOT = analogRead(A2);                              // read POT
-    if (maxPressurePOT > 950 || maxPressurePOT < 50) redLEDonTime = millis();
-    else POTblueLEDonTime = millis();                                // flash LEDs for feedback
-    maxPressurePOTconstrianed = constrain(maxPressurePOT, 50, 950);          // constrain POT values to account for tollerance
-  }
-
-  currentLimit = map(maxPressurePOTconstrianed, 50, 950, 800, 1200);       // set current limit
-  currentLimit = constrain(currentLimit, 800, 1200);            // constrain current limits
-  revTimeSetting = map(currentLimit, 800, 1200, 650, 850);      // set reversing time period
-  revTimeSetting = constrain(revTimeSetting, 650, 850);         // constrain reverse time limits
-
-  // frequency up button reading
-  int reading2 = digitalRead(freqUpButtonPin);
-  // debounce
-  if (reading2 != lastButtonState2) lastDebounceTime2 = millis();    // reset the debouncing timer if state change
-  if ((millis() - lastDebounceTime2) > debounceDelay) {              // if button pressed for longer than delay
-    if (reading2 != buttonState2)
-    {
-      buttonState2 = reading2;
-      if (buttonState2 == LOW)
-      {
-        bpm++;         // add 1 to breath per min setting
-        if (bpm <= 30) blueLEDonTime = millis();
-        else redLEDonTime = millis();
-      }
-    }
-  }
-  lastButtonState2 = reading2;
-
-  // frequency down button reading
-  int reading6 = digitalRead(freqDownButtonPin);
-  // debounce
-  if (reading6 != lastButtonState6) lastDebounceTime6 = millis();    // reset the debouncing timer if state change
-  if ((millis() - lastDebounceTime6) > debounceDelay) {              // if button pressed for longer than delay
-    if (reading6 != buttonState6)
-    {
-      buttonState6 = reading6;
-      if (buttonState6 == LOW)
-      {
-        bpm--;         // take away 1 from breath per min setting
-        if (bpm >= 10) blueLEDonTime = millis();
-        else redLEDonTime = millis();
-      }
-    }
-  }
-  lastButtonState6 = reading6;
-
-  bpm = constrain(bpm, 10, 30);       // constrain variable to 10-30 b/m
-  breathPeriod = (60 / bpm) * 1000;                  // calc time needed per breath in ms based on UI setting
-  // Serial.println(bpm);
-
-  if (millis() - blueLEDonTime < 200) digitalWrite(blueLEDPin, HIGH);   // flash blue LED for button press feedback
-  else digitalWrite(blueLEDPin, LOW);
-  if (millis() - redLEDonTime < 500) digitalWrite(redLEDPin, HIGH);     // flash red LED if b/m limit reached
-  else digitalWrite(redLEDPin, LOW);
-  if (millis() - POTblueLEDonTime < 10) digitalWrite(blueLEDPin, HIGH);   // flash blue LED for button press feedback
-  else digitalWrite(blueLEDPin, LOW);
 }
