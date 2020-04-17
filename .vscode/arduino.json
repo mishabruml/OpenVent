@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "motor_control_with_flowsensor/motor_control_with_flowsensor.ino",
-    "port": "/dev/tty.usbmodem144201"
+    "port": "/dev/tty.usbmodem144201",
+    "sketch": "motor_control_with_flowsensor/motor_control_with_flowsensor.ino"
 }
