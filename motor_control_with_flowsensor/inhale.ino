@@ -15,6 +15,7 @@ void inhale ()
     }
     setMotor1Speed(mSpeed);
     checkUI();
-    printCycleInfo("inhale",current);
+    // printCycleInfo("inhale",current);
+    Serial.println(getFlowRateMls());
   }
 }

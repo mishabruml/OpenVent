@@ -5,6 +5,7 @@ void postExhalePause ()
     setMotor1Speed(0);
     //digitalWrite(9, HIGH);          // apply brake DON'T USE
     checkUI();
-    printCycleInfo("pePause",current);
+    // printCycleInfo("pePause",current);
+    Serial.println(getFlowRateMls());
   }
 }

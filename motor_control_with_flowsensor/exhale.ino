@@ -17,6 +17,7 @@ void exhale ()
     }
     setMotor1Speed(revAccelSpeed);
     checkUI();
-    printCycleInfo("exhale",current);
+    // printCycleInfo("exhale",current);
+    Serial.println(getFlowRateMls());
   }
 }
