@@ -101,23 +101,17 @@ void loop()
     ventStateCopy = ventState;
     interrupts();
     
-    // Serial.print("Flow ml/s\t");
-    // Serial.println(flowReadingCopy);
-    // Serial.print("\tvent state\t");
 
     Serial.print("vent state\t");
     Serial.print(ventStateCopy);
     Serial.print("\tprevious vent state\t");
     Serial.print(previousVentState);
 
-
     if(previousVentState != ventStateCopy){
       Serial.println("state change");
       previousVentState = ventStateCopy;
       motorSpeed = 0; // set to 0 at state change
     }
-
-    // Serial.println(ventStateCopy);
 
     if(ventStateCopy == inhaleState)
     {
