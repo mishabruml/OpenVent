@@ -45,12 +45,12 @@ int revTimeSetting = 400;       // time it takes to reverse in ms
 int revSpeed = 400;             // max speed of reverse stroke
 int maxFwdSpeed = -400;         // max speed of motor/acceloration limit
 
-int currentLimit = 500;        // current limit
-
 int postInhaleDwell = 0;
 unsigned long postExhaleDwell = 0;
 unsigned long lastBreathTime = 0;
 unsigned long breathPeriod = 0;
+
+int currentLimit = 500;        // current limit
 
 void setup()
 {
@@ -73,12 +73,10 @@ void setup()
   setMotor1Speed(100);
   delay(1000);
   setMotor1Speed(0);
-  delay(5000);
+  delay(3000);
 
   Timer1.initialize(1000); // 1ms
-  Timer1.attachInterrupt(systemTick); // systemTick to run every 1ms
-  
-  // Serial.println("stage\tms\tcurrent\tpressure(pa)\tflow(ml/s)");
+  Timer1.attachInterrupt(systemTick); // systemTick to run every 1ms  
 }
 
 volatile int elapsedTime = 0;
@@ -90,14 +88,16 @@ const int motorUpdateRate = 10; // update motor every 10 ticks
 unsigned int motorCount = motorUpdateRate;
 volatile int doMotorUpdate = 0;
 
-const int inhaleState = 1;
-const int exhaleState = 0;
+const int inhaleState = 0;
+const int postInhaleDwellState = 1;
+const int exhaleState = 2;
+const int postExhaleDwellState = 3;
 
 volatile int ventState = inhaleState;
 
 const int inhaleDuration = 1000; // ticks
-const int dwell = 100;
 const int exhaleDuration = 800; // ticks
+const int dwell = 500; //ticks
 
 volatile int breathCycle = inhaleDuration;
 
@@ -121,10 +121,20 @@ void systemTick(void)
   {
     if (ventState == inhaleState)
     {
+      ventState = postInhaleDwellState;
+      breathCycle = dwell;
+    }
+    else if (ventState == postInhaleDwellState)
+    {
       ventState = exhaleState;
       breathCycle = exhaleDuration;
     }
-    else
+    else if (ventState == exhaleState)
+    {
+      ventState = postExhaleDwellState;
+      breathCycle = dwell;
+    }
+    else if (ventState == postExhaleDwellState)
     {
       ventState = inhaleState;
       breathCycle = inhaleDuration;
@@ -147,18 +157,21 @@ void loop()
     elapsedTimeCopy = elapsedTime;
     interrupts();
     // Serial.print("Flow ml/s\t");
-    // Serial.println(flowReadingCopy);
+    Serial.println(flowReadingCopy);
     // Serial.print("\tvent state\t");
     if(ventStateCopy == inhaleState)
     {
-      Serial.print("inhale\t");
-      Serial.println(elapsedTimeCopy);
-      setMotor1Speed(-200);
+      setMotor1Speed(-150);
+    }
+    else if(ventStateCopy == postInhaleDwellState)
+    {
+      setMotor1Speed(0);
     }
     else if(ventStateCopy == exhaleState){
-      Serial.print("exhale\t");
-      Serial.println(elapsedTimeCopy);
-      setMotor1Speed(200);
+      setMotor1Speed(150);
+    }
+    else if(ventStateCopy == postExhaleDwellState){
+      setMotor1Speed(0);
     }
   }
 
