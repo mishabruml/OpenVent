@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include <sfm3000wedo.h>
-#include "ArduinoMotorShieldR3.h"
+#include <ArduinoMotorShieldR3.h>
 #include <TimerOne.h>
 
 ArduinoMotorShieldR3 md;
@@ -10,32 +10,26 @@ int DIR_A = 12;
 int PWM_A = 3;
 int current = 0;     // log filtered current reading
 
-int currentLimit = 500;        // current limit
-
-volatile int elapsedTime = 0;
-volatile int flowReadingMls;
-int flowReadingSum = 0;
-
+const int currentLimit = 500;        // current limit
 const int motorUpdateRate = 10; // update motor every 10 ticks
-unsigned int motorCount = motorUpdateRate;
+
+const unsigned int inhaleState = 0;
+const unsigned int exhaleState = 1;
+const unsigned int inhaleDuration = 1000; // ticks
+const unsigned int exhaleDuration = 800; // ticks
+const unsigned int motorSpeedDelta = 8; // for ramping motor speed
+const int maxMotorSpeed = 400;
+
+volatile int flowReadingMls;
 volatile int doMotorUpdate = 0;
-
-const int inhaleState = 0;
-const int postInhaleDwellState = 1;
-const int exhaleState = 2;
-const int postExhaleDwellState = 3;
-
 volatile int ventState = inhaleState;
-
-const int inhaleDuration = 1000; // ticks
-const int exhaleDuration = 800; // ticks
-const int dwell = 100; //ticks
-
 volatile int breathCycle = inhaleDuration;
+
+unsigned int flowReadingSum = 0;
+unsigned int motorCount = motorUpdateRate;
 
 void systemTick(void)
 {
-  elapsedTime = elapsedTime + 1;
   flowReadingMls = getFlowRateMls();
   flowReadingSum = flowReadingSum + flowReadingMls;
   
@@ -53,20 +47,10 @@ void systemTick(void)
   {
     if (ventState == inhaleState)
     {
-      ventState = postInhaleDwellState;
-      breathCycle = dwell;
-    }
-    else if (ventState == postInhaleDwellState)
-    {
       ventState = exhaleState;
       breathCycle = exhaleDuration;
     }
     else if (ventState == exhaleState)
-    {
-      ventState = postExhaleDwellState;
-      breathCycle = dwell;
-    }
-    else if (ventState == postExhaleDwellState)
     {
       ventState = inhaleState;
       breathCycle = inhaleDuration;
@@ -86,26 +70,28 @@ void setup()
   Serial.begin(115200);
   Serial.println("OpenVent Bristol");
   
-  // Motor initialisation
-  while( current < 590 ){
-    setMotor1Speed(-100);
-    current = getCurrentM1();
-  }
-  delay(1000);
-  setMotor1Speed(100);
-  delay(1000);
-  setMotor1Speed(0);
-  delay(3000);
+  // // Motor initialisation
+  // while( current < 590 ){
+  //   setMotor1Speed(-100);
+  //   current = getCurrentM1();
+  // }
+  // delay(1000);
+  // setMotor1Speed(100);
+  // delay(1000);
+  // setMotor1Speed(0);
+  // delay(3000);
 
   Timer1.initialize(1000); // 1ms
   Timer1.attachInterrupt(systemTick); // systemTick to run every 1ms  
 }
 
+unsigned int previousVentState = inhaleState;
+int motorSpeed = 0;
+
 void loop()
 {
-  unsigned long elapsedTimeCopy;
   unsigned int ventStateCopy;
-  int flowReadingCopy;
+  unsigned int flowReadingCopy;
 
   if (doMotorUpdate == 1)
   {
@@ -113,31 +99,41 @@ void loop()
     flowReadingCopy = flowReadingMls;
     doMotorUpdate = 0;
     ventStateCopy = ventState;
-    elapsedTimeCopy = elapsedTime;
     interrupts();
+    
     // Serial.print("Flow ml/s\t");
-    Serial.println(flowReadingCopy);
+    // Serial.println(flowReadingCopy);
     // Serial.print("\tvent state\t");
+
+    Serial.print("vent state\t");
+    Serial.print(ventStateCopy);
+    Serial.print("\tprevious vent state\t");
+    Serial.print(previousVentState);
+
+
+    if(previousVentState != ventStateCopy){
+      Serial.println("state change");
+      previousVentState = ventStateCopy;
+      motorSpeed = 0; // set to 0 at state change
+    }
+
+    // Serial.println(ventStateCopy);
+
     if(ventStateCopy == inhaleState)
     {
-      setMotor1Speed(-150);
-    }
-    else if(ventStateCopy == postInhaleDwellState)
-    {
-      setMotor1Speed(0);
+      if(motorSpeed > -maxMotorSpeed){
+        motorSpeed = motorSpeed - motorSpeedDelta;
+      }
+      setMotor1Speed(motorSpeed);
     }
     else if(ventStateCopy == exhaleState){
-      setMotor1Speed(150);
+      if(motorSpeed < maxMotorSpeed){
+        motorSpeed = motorSpeed + motorSpeedDelta;
+      }
+      setMotor1Speed(motorSpeed);
     }
-    else if(ventStateCopy == postExhaleDwellState){
-      setMotor1Speed(0);
-    }
-  }
 
-  // checkUI();
-  // lastBreathTime = millis();
-  // inhale();
-  // postInhalePause();
-  // exhale();
-  // postExhalePause();
+    Serial.print("\tmotor speed\t");
+    Serial.println(motorSpeed);
+  }
 }
