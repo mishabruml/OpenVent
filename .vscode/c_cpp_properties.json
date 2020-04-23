@@ -14,7 +14,8 @@
                     "${workspaceRoot}",
                     "/Users/misha.bruml/Documents/Arduino/libraries/Sensirion_SFM3000_arduino-master/",
                     "/Users/misha.bruml/Documents/Arduino/libraries/ArduinoMotorShieldR3/",
-                    "/Users/misha.bruml/Documents/Arduino/libraries/TimerOne"
+                    "/Users/misha.bruml/Documents/Arduino/libraries/TimerOne",
+                    "/Users/misha.bruml/Documents/Arduino/libraries/PID"
                 ]
             },
             "defines": [],
